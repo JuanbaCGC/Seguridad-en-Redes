@@ -1,5 +1,5 @@
 usersList = [
-    {"name": "JuanbaCGC", "password": "12345"},
-    {"name": "AlbertoMN", "password": "hola"},
-    {"name": "ArturoGJ", "password": "hola123"}
+    {"username": "JuanbaCGC", "password": "12345"},
+    {"username": "AlbertoMN", "password": "hola"},
+    {"username": "ArturoGJ", "password": "hola123"}
 ]
