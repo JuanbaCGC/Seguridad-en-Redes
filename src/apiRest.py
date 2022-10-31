@@ -61,7 +61,7 @@ def login():
 	except KeyError:
 		return jsonify({'error': "Introduce only the username and the password."}), HTTP_400_BAD_REQUEST
 	
-	userFound = [users for users in UserList if user['username'] == request.json['username'] and user['password'] == request.json['password']]
+	userFound = [users for users in UserList if users['username'] == request.json['username'] and users['password'] == request.json['password']]
 	if(len(userFound) > 0):
 		token = secrets.token_urlsafe(20)
 		return jsonify({"Message": "User Login Succesfully", "User token": token}), HTTP_201_CREATED 
