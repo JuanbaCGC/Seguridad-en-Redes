@@ -13,11 +13,7 @@ UserList=[]
 string_json = json.load(open('users.json'))
 
 for persona in string_json:
-	user = {
-		"username": {persona['username']},
-		"password": {persona['password']}
-	}
-	UserList.append(user)
+	UserList.append(persona)
 
 #/VERSION
 @app.route('/version', methods=['GET'])
@@ -38,8 +34,8 @@ def signup():
 	userFound = [users for users in UserList if users['username'] == request.json['username']]
 	if (len(userFound) > 0):
 		return 'There is a user with the same name. Try other user name.', HTTP_400_BAD_REQUEST
-
-	UserList.append(newUser)
+	else:
+		UserList.append(newUser)
 	
 	with open('users.json', "r") as file:
 		data = json.load(file)
