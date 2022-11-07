@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request, Blueprint
 from flask_restful import Resource, Api
 import json
 import secrets
+import threading
 from http_status_codes import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
 app = Flask(__name__)
@@ -14,6 +15,17 @@ string_json = json.load(open('users.json'))
 
 for persona in string_json:
 	UserList.append(persona)
+
+def read(filename):
+	"""Metodo para leer un fichero"""
+	file = open(filename, 'r')
+	content = file.read()
+	return json.loads(content)
+
+def write(filename, content):
+	"""Metodo para escribir en un fichero"""
+	file = open(filename, 'w')
+	file.write(json.dumps(content))
 
 #/VERSION
 @app.route('/version', methods=['GET'])
@@ -59,10 +71,20 @@ def login():
 	
 	userFound = [users for users in UserList if users['username'] == request.json['username'] and users['password'] == request.json['password']]
 	if(len(userFound) > 0):
+		#tokens = read('tokens.json')
 		token = secrets.token_urlsafe(20)
+		#tokens.update({token:user}) para asignar token a usuario 
+		#write('tokens.json', tokens)
+		#timer = threading.Timer(300.0, revokeToken, (token))
+    	#timer.start()
 		return jsonify({"Message": "User Login Succesfully", "User token": token}), HTTP_201_CREATED 
 	else:
 		return 'Incorrect username or password!', HTTP_400_BAD_REQUEST
+
+def revokeToken(token):
+    tokens = read('tokens.json')
+    tokens.pop(''+token+'')
+    write('tokens.json', tokens)
 
 if __name__ == '__main__':
 	app.run(debug=True, port=5000)
