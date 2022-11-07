@@ -27,6 +27,11 @@ def write(filename, content):
 	file = open(filename, 'w')
 	file.write(json.dumps(content))
 
+def revokeToken(token):
+    tokens = read('tokens.json')
+    tokens.pop(''+token+'')
+    write('tokens.json', tokens)
+
 #/VERSION
 @app.route('/version', methods=['GET'])
 def getVersion():
@@ -71,20 +76,15 @@ def login():
 	
 	userFound = [users for users in UserList if users['username'] == request.json['username'] and users['password'] == request.json['password']]
 	if(len(userFound) > 0):
-		#tokens = read('tokens.json')
+		tokens = read('tokens.json')
 		token = secrets.token_urlsafe(20)
-		#tokens.update({token:user}) para asignar token a usuario 
-		#write('tokens.json', tokens)
-		#timer = threading.Timer(300.0, revokeToken, (token))
-    	#timer.start()
+		tokens.update({token:user})
+		write('tokens.json', tokens)
+		timer = threading.Timer(300.0, revokeToken, (token))
+    	timer.start()
 		return jsonify({"Message": "User Login Succesfully", "User token": token}), HTTP_201_CREATED 
 	else:
 		return 'Incorrect username or password!', HTTP_400_BAD_REQUEST
-
-def revokeToken(token):
-    tokens = read('tokens.json')
-    tokens.pop(''+token+'')
-    write('tokens.json', tokens)
 
 if __name__ == '__main__':
 	app.run(debug=True, port=5000)
