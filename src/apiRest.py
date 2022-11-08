@@ -97,6 +97,11 @@ def login():
         return 'Incorrect username or password!', HTTP_400_BAD_REQUEST
 
 #/<string:username>/<string:doc_id>
+@app.route('/<string:username>/<string:doc_id>', methods=['GET'])
+def get(username, doc_id):
+    docFound = [doc for doc in DocumentList if doc['owner'] == username and doc['doc_id'] == doc_id]
+    return jsonify(docFound)
+
 @app.route('/<string:username>/<string:doc_id>', methods=['POST'])
 def post(username,doc_id):
     userFound = [users for users in UserList if users['username'] == username]
