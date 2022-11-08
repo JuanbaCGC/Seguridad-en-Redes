@@ -105,7 +105,8 @@ def get(username, doc_id):
 @app.route('/<string:username>/<string:doc_id>', methods=['POST'])
 def post(username,doc_id):
     userFound = [users for users in UserList if users['username'] == username]
-    if(len(userFound) == 1):
+    documentFound = [documents for documents in DocumentList if documents['doc_id'] == doc_id]
+    if(len(userFound) == 1 and len(documentFound) == 0):
         try:
             doc = {
                 "owner":username,
@@ -125,6 +126,8 @@ def post(username,doc_id):
             json.dump(data, file)
         
         return jsonify({"size": size}), HTTP_201_CREATED 
+    elif (len(documentFound) > 0):
+        return 'The doc_id exist already! Try again with other doc_id', HTTP_400_BAD_REQUEST
     else:
         return 'The username does not exist! Try again with other username', HTTP_400_BAD_REQUEST
 
