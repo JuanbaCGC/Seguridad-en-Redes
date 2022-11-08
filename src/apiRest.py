@@ -22,7 +22,7 @@ for user in users_json:
 #Read documents.json
 documents_json = json.load(open('documents.json'))
 for document in documents_json:
-    UserList.append(document)
+    DocumentList.append(document)
 
 def read(filename):
     file = open(filename, 'r')
@@ -104,6 +104,7 @@ def post(username,doc_id):
         try:
             doc = {
                 "owner":username,
+                "doc_id":doc_id,
                 "doc_content":request.json['doc_content']
             }
         except KeyError:
@@ -111,6 +112,13 @@ def post(username,doc_id):
 
         DocumentList.append(doc)
         size = sys.getsizeof(request.json['doc_content'])
+        
+        with open('documents.json', "r") as file:
+            data = json.load(file)
+        data.append(doc)
+        with open('documents.json', "w") as file:
+            json.dump(data, file)
+        
         return jsonify({"size": size}), HTTP_201_CREATED 
     else:
         return 'The username does not exist! Try again with other username', HTTP_400_BAD_REQUEST
