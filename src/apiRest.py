@@ -31,18 +31,25 @@ def read(filename):
 
 def write(filename, content):
     file = open(filename, 'w')
-    file.write(json.dumps(content))
+    file.write(json.dumps(content, indent=4))
 
 def revokeToken(token):
-    tokens = read('tokens.json')
-    tokens.pop(''+token+'')
-    write('tokens.json', tokens)
+    with open("tokens.json") as f:
+        data = json.loads(f.read())
+    for token_saved in data:
+        if(token_saved==token):
+            del token_saved
+    write('tokens.json', data)
 
-def writeToken(token, user):
+def writeToken(token, username):
     tokens = read('./tokens.json')
-    tokens.update({token:user})
+    newToken = {
+        "token_id":token,
+        "username":username
+    }
+    tokens.update(newToken)
     write('tokens.json', tokens)
-    timer = threading.Timer(15.0, revokeToken, (token, ))
+    timer = threading.Timer(5.0, revokeToken,(newToken, ))
     timer.start()
 
 #/VERSION
@@ -71,10 +78,10 @@ def signup():
             data = json.load(file)
         data.append(newUser)
         with open('users.json', "w") as file:
-            json.dump(data, file)
+            json.dump(data, file, indent=4)
 
         token = secrets.token_urlsafe(20)
-        writeToken(token,newUser)
+        writeToken(token,request.json['username'])
         return jsonify({"access_token": token}), HTTP_201_CREATED 
 
 #/LOGIN
@@ -91,7 +98,7 @@ def login():
     userFound = [users for users in UserList if users['username'] == request.json['username'] and users['password'] == request.json['password']]
     if(len(userFound) > 0):
         token = secrets.token_urlsafe(20)
-        writeToken(token,user)
+        writeToken(token,request.json['username'])
         return jsonify({"access_token": token}), HTTP_201_CREATED 
     else:
         return 'Incorrect username or password!', HTTP_400_BAD_REQUEST
@@ -123,7 +130,7 @@ def post(username,doc_id):
             data = json.load(file)
         data.append(doc)
         with open('documents.json', "w") as file:
-            json.dump(data, file)
+            json.dump(data, file, indent=4)
         
         return jsonify({"size": size}), HTTP_201_CREATED 
     elif (len(documentFound) > 0):
