@@ -2,10 +2,10 @@
 
 from flask import Flask, jsonify, request, Blueprint
 from flask_restful import Resource, Api
+import sys
 import json
 import secrets
 import threading
-import sys
 from http_status_codes import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
 
 app = Flask(__name__)
@@ -25,29 +25,26 @@ for document in documents_json:
     DocumentList.append(document)
 
 def read(filename):
-    file = open(filename, 'r')
-    content = file.read()
-    return json.loads(content)
+    with open(filename, "r") as file:
+        data = json.load(file)
+    return data
 
 def write(filename, content):
-    file = open(filename, 'w')
-    file.write(json.dumps(content, indent=4))
+    with open(filename, "w") as file:
+        json.dump(content, file, indent=4)
 
 def revokeToken(token):
-    with open("tokens.json") as f:
-        data = json.loads(f.read())
-    for token_saved in data:
-        if(token_saved==token):
-            del token_saved
+    data = read('tokens.json')
+    data.remove(token)
     write('tokens.json', data)
 
 def writeToken(token, username):
-    tokens = read('./tokens.json')
     newToken = {
         "token_id":token,
         "username":username
     }
-    tokens.update(newToken)
+    tokens = read('tokens.json')
+    tokens.append(newToken)
     write('tokens.json', tokens)
     timer = threading.Timer(5.0, revokeToken,(newToken, ))
     timer.start()
@@ -74,11 +71,9 @@ def signup():
     else:
         UserList.append(newUser)
 
-        with open('users.json', "r") as file:
-            data = json.load(file)
+        data = read('users.json')
         data.append(newUser)
-        with open('users.json', "w") as file:
-            json.dump(data, file, indent=4)
+        write('users.json', data)
 
         token = secrets.token_urlsafe(20)
         writeToken(token,request.json['username'])
@@ -126,11 +121,9 @@ def post(username,doc_id):
         DocumentList.append(doc)
         size = sys.getsizeof(request.json['doc_content'])
         
-        with open('documents.json', "r") as file:
-            data = json.load(file)
+        data = read('documents.json')
         data.append(doc)
-        with open('documents.json', "w") as file:
-            json.dump(data, file, indent=4)
+        write('documents.json', data)
         
         return jsonify({"size": size}), HTTP_201_CREATED 
     elif (len(documentFound) > 0):
