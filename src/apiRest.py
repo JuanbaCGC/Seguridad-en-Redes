@@ -22,6 +22,7 @@ for user in users_json:
 #Read documents.json
 documents_json = json.load(open('documents.json'))
 for document in documents_json:
+    print(document)
     DocumentList.append(document)
 
 def read(filename):
@@ -46,8 +47,12 @@ def writeToken(token, username):
     tokens = read('tokens.json')
     tokens.append(newToken)
     write('tokens.json', tokens)
-    timer = threading.Timer(5.0, revokeToken,(newToken, ))
+    timer = threading.Timer(20.0, revokeToken,(newToken, ))
     timer.start()
+
+def user_exist(username):
+    userFound = [users for users in UserList if users['username'] == username]
+    return username
 
 #/VERSION
 @app.route('/version', methods=['GET'])
@@ -104,9 +109,28 @@ def get(username, doc_id):
     docFound = [doc for doc in DocumentList if doc['owner'] == username and doc['doc_id'] == doc_id]
     return jsonify(docFound)
 
+@app.route('/<string:user_name>/all_docs' , methods=['GET'])
+def get_all_docs(user_name):
+    coincidence = False
+    counter = 0
+    new_list=[]
+    for documents in DocumentList:
+        if(documents['owner']  == user_name):
+            coincidence = True
+            counter += 1
+            document = {
+                "id"+str(counter): documents['doc_id'],
+                "content":documents['doc_content']
+            }
+            new_list.append(document)
+    if coincidence == False:
+        return 'The user does not have any document', HTTP_400_BAD_REQUEST
+    else:
+        return new_list
+
 @app.route('/<string:username>/<string:doc_id>', methods=['POST'])
 def post(username,doc_id):
-    userFound = [users for users in UserList if users['username'] == username]
+    userFound = user_exist(username)
     documentFound = [documents for documents in DocumentList if documents['doc_id'] == doc_id]
     if(len(userFound) == 1 and len(documentFound) == 0):
         try:
