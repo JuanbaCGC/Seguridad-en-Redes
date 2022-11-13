@@ -193,12 +193,10 @@ def put(username, doc_id):
 def delete(username, doc_id):
     validate = verifyHeader(username)
     if(validate[0] == True):
-        new_docList=[]
-        global DocumentList
         for doc in DocumentList:
-            if(doc['owner'] != username and doc['doc_id'] != doc_id):
-                new_docList.append(doc)
-        write('documents.json', new_docList)
+            if(doc['owner'] == username and doc['doc_id'] == doc_id):
+                DocumentList.remove(doc)
+        write('documents.json', DocumentList)
     
         return jsonify({}), HTTP_201_CREATED 
     else:
