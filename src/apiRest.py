@@ -111,7 +111,7 @@ def get(username, doc_id):
 
 @app.route('/<string:username>/<string:doc_id>', methods=['POST'])
 def post(username,doc_id):
-    userFound = user_exist(username)
+    userFound = [users for users in UserList if users['username'] == username]
     docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
     if(len(userFound) == 1 and len(docFound) == 0):
         try:
@@ -151,11 +151,12 @@ def put(username, doc_id):
 
 @app.route('/<string:username>/<string:doc_id>', methods=['DELETE'])
 def delete(username, doc_id):
-    docFound = [doc for doc in DocumentList if doc['owner'] == username and doc['doc_id'] == doc_id]
-
-    data = read('documents.json')
-    data.remove(docFound)
-    write('documents.json', data)
+    new_docList=[]
+    global DocumentList
+    for doc in DocumentList:
+        if(doc['owner'] != username and doc['doc_id'] != doc_id):
+            new_docList.append(doc)
+    write('documents.json', new_docList)
     
     return jsonify({}), HTTP_201_CREATED 
 

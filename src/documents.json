@@ -1,1 +1,7 @@
-[{"owner": "JuanbaCGC", "doc_id": "AA", "doc_content": "PRIMER DOCUMENTO"}, {"owner": "JuanbaCGC", "doc_id": "documento", "doc_content": "lajslfkjaf"}]
+[
+    {
+        "owner": "JuanbaCGC",
+        "doc_id": "doc1",
+        "doc_content": "Hola"
+    }
+]
