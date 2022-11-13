@@ -22,7 +22,6 @@ for user in users_json:
 #Read documents.json
 documents_json = json.load(open('documents.json'))
 for document in documents_json:
-    print(document)
     DocumentList.append(document)
 
 def read(filename):
@@ -123,6 +122,7 @@ def login():
     else:
         return 'Incorrect username or password!', HTTP_400_BAD_REQUEST
 
+#GET DOCUMENT
 #/<string:username>/<string:doc_id>
 @app.route('/<string:username>/<string:doc_id>', methods=['GET'])
 def get(username, doc_id):
@@ -136,6 +136,7 @@ def get(username, doc_id):
     else:
         return validate
 
+#POST DOCUMENT
 @app.route('/<string:username>/<string:doc_id>', methods=['POST'])
 def post(username,doc_id):
     validate = verifyHeader(username)
@@ -167,23 +168,27 @@ def post(username,doc_id):
     else:
         return validate
 
+#PUT DOCUMENT
 @app.route('/<string:username>/<string:doc_id>', methods=['PUT'])
 def put(username, doc_id):
+    global DocumentList
     validate = verifyHeader(username)
     if(validate[0] == True):
-        docFound = [doc for doc in DocumentList if doc['owner'] == username and doc['doc_id'] == doc_id]
-        docFound['doc_content'] = request.json['doc_content']
+        docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
+        if(len(docFound) == 0):
+            return 'The document does not exist! Try again with other doc_id', HTTP_400_BAD_REQUEST
+        for document in DocumentList:
+            if(document['owner']==username and document['doc_id']==doc_id):
+                document['doc_content'] = request.json['doc_content']
     
         size = sys.getsizeof(request.json['doc_content'])
-    
-        data = read('documents.json')
-        data.append(docFound)
-        write('documents.json', data)
+        write('documents.json',DocumentList)
 
         return jsonify({"size": size}), HTTP_201_CREATED 
     else:
         return validate
 
+#DELETE DOCUMENT
 @app.route('/<string:username>/<string:doc_id>', methods=['DELETE'])
 def delete(username, doc_id):
     validate = verifyHeader(username)
@@ -199,6 +204,7 @@ def delete(username, doc_id):
     else:
         return validate
 
+#GET ALL DOCS
 #/<string:username>/_all_docs
 @app.route('/<string:user_name>/all_docs' , methods=['GET'])
 def get_all_docs(user_name):
