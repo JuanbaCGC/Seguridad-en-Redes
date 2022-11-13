@@ -193,10 +193,14 @@ def put(username, doc_id):
 def delete(username, doc_id):
     validate = verifyHeader(username)
     if(validate[0] == True):
-        for doc in DocumentList:
-            if(doc['owner'] == username and doc['doc_id'] == doc_id):
-                DocumentList.remove(doc)
-        write('documents.json', DocumentList)
+        docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
+        if(len(docFound) == 0):
+            return 'The document does not exist! Try again with other doc_id', HTTP_400_BAD_REQUEST
+        else:
+            for doc in DocumentList:
+                if(doc['owner'] == username and doc['doc_id'] == doc_id):
+                    DocumentList.remove(doc)
+            write('documents.json', DocumentList)
     
         return jsonify({}), HTTP_201_CREATED 
     else:
