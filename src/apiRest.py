@@ -208,7 +208,7 @@ def delete(username, doc_id):
 
 #GET ALL DOCS
 #/<string:username>/_all_docs
-@app.route('/<string:user_name>/all_docs' , methods=['GET'])
+@app.route('/<string:user_name>/_all_docs' , methods=['GET'])
 def get_all_docs(user_name):
     validate = verifyHeader(user_name)
     if(validate[0] == True):
