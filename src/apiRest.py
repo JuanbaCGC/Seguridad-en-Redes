@@ -100,7 +100,7 @@ def signup():
             "hash-salt": hashPass(request.json['password'])
         }
     except KeyError:
-        return jsonify({'error': "Introduce only the username and the password."}), HTTP_403_FORBIDDEN
+        return jsonify({'error': "Introduce only the username and the password."}), HTTP_400_BAD_REQUEST
         
     userFound = [users for users in UserList if users['username'] == request.json['username']]
     if (len(userFound) > 0):
@@ -122,7 +122,7 @@ def login():
     try:
         userFound = [users for users in UserList if users['username'] == request.json['username'] and matchHashedText(users['hash-salt'],request.json['password'])]
     except KeyError:
-        return jsonify({'error': "Introduce only the username and the password."}), HTTP_403_FORBIDDEN
+        return jsonify({'error': "Introduce only the username and the password."}), HTTP_400_BAD_REQUEST
     if(len(userFound) > 0):
         token = secrets.token_urlsafe(20)
         writeToken(token,request.json['username'])
@@ -172,7 +172,6 @@ def post(username,doc_id):
         elif (len(docSameId) == 1):
             return jsonify({'error': "You have another document with this doc_id! Try again with other doc_id."}), HTTP_400_BAD_REQUEST
         elif (len(userDocs) == MAX_DOCUMENTS):
-            print("ualsjdflkasjflaj")
             return jsonify({'error': "You have the maximum number of documents ("+str(MAX_DOCUMENTS)+"). If you want to create another one, you must delete other document."}), HTTP_400_BAD_REQUEST        
     else:
         return validate
