@@ -3,5 +3,10 @@
         "owner": "JuanbaCGC",
         "doc_id": "doc1",
         "doc_content": "Hola"
+    },
+    {
+        "owner": "JuanbaCGC",
+        "doc_id": "doc2",
+        "doc_content": "example"
     }
 ]

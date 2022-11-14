@@ -79,7 +79,7 @@ def verifyHeader(username):
             return True,'The authorization header is correct.'
 
 def hashPass(password):
-    #Hashing function for a password using random unique salt
+    #Hashing function for a password using a random unique salt
     salt = uuid.uuid4().hex
     return hashlib.sha256(salt.encode() + password.encode()).hexdigest() + ':' + salt
 
@@ -99,7 +99,7 @@ def signup():
     try:
         newUser = {
             "username": request.json['username'],
-            "password": hashPass(request.json['password'])
+            "hash-salt": hashPass(request.json['password'])
         }
     except KeyError:
         return jsonify({'error': "Introduce only the username and the password."}), HTTP_403_FORBIDDEN
@@ -122,14 +122,9 @@ def signup():
 @app.route('/login', methods=['POST'])
 def login():
     try:
-        user = {
-            "username": request.json['username'],
-            "password": hashPass(request.json['password'])
-        }
+        userFound = [users for users in UserList if users['username'] == request.json['username'] and matchHashedText(users['hash-salt'],request.json['password'])]
     except KeyError:
         return jsonify({'error': "Introduce only the username and the password."}), HTTP_403_FORBIDDEN
-    
-    userFound = [users for users in UserList if users['username'] == request.json['username'] and users['password'] == request.json['password']]
     if(len(userFound) > 0):
         token = secrets.token_urlsafe(20)
         writeToken(token,request.json['username'])

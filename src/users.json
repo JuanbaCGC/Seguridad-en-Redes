@@ -1,22 +1,14 @@
 [
     {
         "username": "JuanbaCGC",
-        "password": "12345"
+        "hash-salt": "29ee69dd886631afaa4a117be4c1e7f1dc7a8b5f044151f2834b18722f948878:5d6742e38dcc4d6899f2ed0e7e9c334f"
     },
     {
         "username": "AlbertoMN",
-        "password": "hola"
+        "hash-salt": "22d27888836d07ec71999979e4ff2b0ce3c63fb789ab877b300b4581f73ec7b3:a15aec305b64481ca459c7ea2eb83570"
     },
     {
-        "username": "ArturoGJ",
-        "password": "hola123"
-    },
-    {
-        "username": "Artu",
-        "password": "d2b776cfe17815e42900462a27c7f657ea94e5e30ff33def177e123be9d8bd47:3411ad020ae34eb4818cfae22ec01b88"
-    },
-    {
-        "username": "Arz",
-        "password": "52aa4d245f42c7b3a29ab775f00fc99244efec40e5f90bf76b3386b9c54aab0c:2fcca4ea04a64c87936177b1db5b06aa"
+        "username": "ArtugoGJ",
+        "hash-salt": "620ecd5fede81a6ba63843a90d9321c0507306892f8d9ad5bfe1e9f238e432b8:0df48164b2ad433f9ff2eee8dbda2f9a"
     }
 ]
