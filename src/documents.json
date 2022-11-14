@@ -8,5 +8,15 @@
         "owner": "JuanbaCGC",
         "doc_id": "doc2",
         "doc_content": "example"
+    },
+    {
+        "owner": "AlbertoMN",
+        "doc_id": "doc1",
+        "doc_content": "example"
+    },
+    {
+        "owner": "AlbertoMN",
+        "doc_id": "doc12",
+        "doc_content": "example"
     }
 ]

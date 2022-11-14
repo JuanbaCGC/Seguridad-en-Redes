@@ -140,7 +140,7 @@ def get(username, doc_id):
     if(validate[0] == True): 
         docFound = [doc for doc in DocumentList if doc['owner'] == username and doc['doc_id'] == doc_id]
         if(len(docFound) != 1):
-            return jsonify({'error': "The user <username> does not have any document with this name."}), HTTP_404_NOT_FOUND
+            return jsonify({'error': "The user "+username+" does not have any document with this name."}), HTTP_404_NOT_FOUND
         else:
             return jsonify(docFound), HTTP_200_OK
     else:
@@ -152,7 +152,7 @@ def post(username,doc_id):
     validate = verifyHeader(username)
     if(validate[0] == True):
         userFound = [users for users in UserList if users['username'] == username]
-        docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
+        docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id and doc['owner']==username]
         if(len(userFound) == 1 and len(docFound) == 0):
             try:
                 doc = {
@@ -172,9 +172,9 @@ def post(username,doc_id):
         
             return jsonify({"size": size}), HTTP_201_CREATED 
         elif (len(docFound) > 0):
-            return jsonify({'error': "The doc_id exist already! Try again with other doc_id."}), HTTP_400_BAD_REQUEST
+            return jsonify({'error': "The user "+username +" has another document with this doc_id! Try again with other doc_id."}), HTTP_400_BAD_REQUEST
         else:
-            return jsonify({'error': "The username does not exist! Try again with other username."}), HTTP_400_BAD_REQUEST
+            return jsonify({'error': "The username "+username+" does not exist! Try again with other username."}), HTTP_400_BAD_REQUEST
     else:
         return validate
 
@@ -186,7 +186,7 @@ def put(username, doc_id):
     if(validate[0] == True):
         docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
         if(len(docFound) == 0):
-            return jsonify({'error': "The document does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
+            return jsonify({'error': "The document with id "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
         for document in DocumentList:
             if(document['owner']==username and document['doc_id']==doc_id):
                 document['doc_content'] = request.json['doc_content']
@@ -205,7 +205,7 @@ def delete(username, doc_id):
     if(validate[0] == True):
         docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
         if(len(docFound) == 0):
-            return jsonify({'error': "The document does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
+            return jsonify({'error': "The document with id "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
         else:
             for doc in DocumentList:
                 if(doc['owner'] == username and doc['doc_id'] == doc_id):
@@ -218,15 +218,15 @@ def delete(username, doc_id):
 
 #GET ALL DOCS
 #/<string:username>/_all_docs
-@app.route('/<string:user_name>/_all_docs' , methods=['GET'])
-def get_all_docs(user_name):
-    validate = verifyHeader(user_name)
+@app.route('/<string:username>/_all_docs' , methods=['GET'])
+def get_all_docs(username):
+    validate = verifyHeader(username)
     if(validate[0] == True):
         coincidence = False
         counter = 0
         new_list=[]
         for documents in DocumentList:
-            if(documents['owner']  == user_name):
+            if(documents['owner']  == username):
                 coincidence = True
                 counter += 1
                 doc_id = "id"+str(counter)
@@ -236,7 +236,7 @@ def get_all_docs(user_name):
                 }
                 new_list.append(document)
         if coincidence == False:
-            return jsonify({'error': "The user does not have any document."}), HTTP_404_NOT_FOUND
+            return jsonify({'error': "The user "+username+"does not have any document."}), HTTP_404_NOT_FOUND
         else:
             return jsonify(new_list), HTTP_200_OK 
     else:
