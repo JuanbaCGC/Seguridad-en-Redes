@@ -26,20 +26,24 @@ documents_json = json.load(open('documents.json'))
 for document in documents_json:
     DocumentList.append(document)
 
+# Method that read the input filename
 def read(filename):
     with open(filename, "r") as file:
         data = json.load(file)
     return data
 
+# Method that write in the input filename
 def write(filename, content):
     with open(filename, "w") as file:
         json.dump(content, file, indent=4)
 
+# Method that revoke a token after five minutes of its creation
 def revokeToken(token):
     data = read('tokens.json')
     data.remove(token)
     write('tokens.json', data)
 
+# Method that write a token in the tokens.json
 def writeToken(token, username):
     newToken = {
         "token_id":token,
@@ -51,6 +55,7 @@ def writeToken(token, username):
     timer = threading.Timer(300.0, revokeToken,(newToken, ))
     timer.start()
 
+# Method that search if the token given is correct
 def verifyToken(token):
     data = read('tokens.json')
     for saved_token in data:
@@ -58,6 +63,7 @@ def verifyToken(token):
             return (True,saved_token['username'])
     return (False,'The token does not exist')
 
+# Method that provide the errors if the Authorization header is incorrect
 def verifyHeader(username):
     #Get the Authorization header (the first position is "token", the second is the user_token) and verify the structure
     header = request.headers.get('Authorization')
@@ -76,15 +82,20 @@ def verifyHeader(username):
         else:
             return True,'The authorization header is correct.'
 
+#Hashing function for a password using a random unique salt
 def hashPass(password):
-    #Hashing function for a password using a random unique salt
     salt = uuid.uuid4().hex
     return hashlib.sha256(salt.encode() + password.encode()).hexdigest() + ':' + salt
 
+# Method to compare the hash stored in the users.json and the provided password and see if they match
 def matchHashedText(hashedPass, providedPass):
     #Check for the password in the hashed password
     _hashedPass, salt = hashedPass.split(':')
     return _hashedPass == hashlib.sha256(salt.encode() + providedPass.encode()).hexdigest()
+
+# Method to clear the tokens.json
+def clearTokens():
+    write('tokens.json', [])
 
 #/VERSION
 @app.route('/version', methods=['GET'])
@@ -242,3 +253,4 @@ def get_all_docs(username):
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+    app.teardown_appcontext(clearTokens())
