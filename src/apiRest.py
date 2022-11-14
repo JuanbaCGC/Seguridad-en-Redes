@@ -6,7 +6,7 @@ import sys
 import json
 import secrets
 import threading
-from http_status_codes import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 
 app = Flask(__name__)
 api = Api(app)
@@ -59,24 +59,27 @@ def verifyToken(token):
 def verifyHeader(username):
     #Get the Authorization header (the first position is "token", the second is the user_token) and verify the structure
     header = request.headers.get('Authorization')
-    authHeader = header.split()
-    if(len(authHeader) != 2 or authHeader[0] != "token"):
-        return 'Incorrect authorization header. Try again with the following format: token user_token', HTTP_400_BAD_REQUEST
-
-    #Verify that the token exist and it belongs to the user that do the request
-    token_exist = verifyToken(authHeader[1])
-    user_name = token_exist[1]
-    if(token_exist[0] == False):
-        return 'Incorrect token.', HTTP_400_BAD_REQUEST
-    elif(user_name != username):
-        return 'The token of the header belongs to other user.', HTTP_400_BAD_REQUEST
+    if(header is None):
+        return jsonify({'error': "Header is empty. Enter authorization"}), HTTP_401_UNAUTHORIZED
     else:
-        return True,'The authorization header is correct.'
+        authHeader = header.split()
+        if(len(authHeader) != 2 or authHeader[0] != "token"):
+            return jsonify({'error': "Incorrect authorization header. Try again with the following format: token user_token."}), HTTP_400_BAD_REQUEST
+
+        #Verify that the token exist and it belongs to the user that do the request
+        token_exist = verifyToken(authHeader[1])
+        user_name = token_exist[1]
+        if(token_exist[0] == False):
+            return jsonify({'error': "Incorrect token."}), HTTP_403_FORBIDDEN
+        elif(user_name != username):
+            return jsonify({'error': "The token of the header belongs to other user."}), HTTP_403_FORBIDDEN
+        else:
+            return True,'The authorization header is correct.'
 
 #/VERSION
 @app.route('/version', methods=['GET'])
 def getVersion():
-    return jsonify({"Version":"1.0"})
+    return jsonify({"Version":"1.0"}), HTTP_200_OK
 
 #/SIGNUP
 @app.route('/signup', methods=['POST'])
@@ -87,11 +90,11 @@ def signup():
             "password": request.json['password']
         }
     except KeyError:
-        return jsonify({'error': "Introduce only the username and the password."}), HTTP_400_BAD_REQUEST
+        return jsonify({'error': "Introduce only the username and the password."}), HTTP_403_FORBIDDEN
         
     userFound = [users for users in UserList if users['username'] == request.json['username']]
     if (len(userFound) > 0):
-        return 'There is a user with the same name. Try other user name.', HTTP_400_BAD_REQUEST
+        return jsonify({'error': "There is a user with the same name. Try other user name."}), HTTP_403_FORBIDDEN
     else:
         UserList.append(newUser)
 
@@ -112,7 +115,7 @@ def login():
             "password": request.json['password']
         }
     except KeyError:
-        return jsonify({'error': "Introduce only the username and the password."}), HTTP_400_BAD_REQUEST
+        return jsonify({'error': "Introduce only the username and the password."}), HTTP_403_FORBIDDEN
     
     userFound = [users for users in UserList if users['username'] == request.json['username'] and users['password'] == request.json['password']]
     if(len(userFound) > 0):
@@ -120,7 +123,7 @@ def login():
         writeToken(token,request.json['username'])
         return jsonify({"access_token": token}), HTTP_201_CREATED 
     else:
-        return 'Incorrect username or password!', HTTP_400_BAD_REQUEST
+        return jsonify({'error': "Incorrect username or password!"}), HTTP_403_FORBIDDEN
 
 #GET DOCUMENT
 #/<string:username>/<string:doc_id>
@@ -130,9 +133,9 @@ def get(username, doc_id):
     if(validate[0] == True): 
         docFound = [doc for doc in DocumentList if doc['owner'] == username and doc['doc_id'] == doc_id]
         if(len(docFound) != 1):
-            return 'The user <username> does not have any document with this name.', HTTP_400_BAD_REQUEST
+            return jsonify({'error': "The user <username> does not have any document with this name."}), HTTP_404_NOT_FOUND
         else:
-            return jsonify(docFound)
+            return jsonify(docFound), HTTP_200_OK
     else:
         return validate
 
@@ -162,9 +165,9 @@ def post(username,doc_id):
         
             return jsonify({"size": size}), HTTP_201_CREATED 
         elif (len(docFound) > 0):
-            return 'The doc_id exist already! Try again with other doc_id', HTTP_400_BAD_REQUEST
+            return jsonify({'error': "The doc_id exist already! Try again with other doc_id."}), HTTP_400_BAD_REQUEST
         else:
-            return 'The username does not exist! Try again with other username', HTTP_400_BAD_REQUEST
+            return jsonify({'error': "The username does not exist! Try again with other username."}), HTTP_400_BAD_REQUEST
     else:
         return validate
 
@@ -176,7 +179,7 @@ def put(username, doc_id):
     if(validate[0] == True):
         docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
         if(len(docFound) == 0):
-            return 'The document does not exist! Try again with other doc_id', HTTP_400_BAD_REQUEST
+            return jsonify({'error': "The document does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
         for document in DocumentList:
             if(document['owner']==username and document['doc_id']==doc_id):
                 document['doc_content'] = request.json['doc_content']
@@ -195,14 +198,14 @@ def delete(username, doc_id):
     if(validate[0] == True):
         docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
         if(len(docFound) == 0):
-            return 'The document does not exist! Try again with other doc_id', HTTP_400_BAD_REQUEST
+            return jsonify({'error': "The document does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
         else:
             for doc in DocumentList:
                 if(doc['owner'] == username and doc['doc_id'] == doc_id):
                     DocumentList.remove(doc)
             write('documents.json', DocumentList)
     
-        return jsonify({}), HTTP_201_CREATED 
+        return jsonify({}), HTTP_200_OK 
     else:
         return validate
 
@@ -226,9 +229,9 @@ def get_all_docs(user_name):
                 }
                 new_list.append(document)
         if coincidence == False:
-            return 'The user does not have any document', HTTP_400_BAD_REQUEST
+            return jsonify({'error': "The user does not have any document."}), HTTP_404_NOT_FOUND
         else:
-            return new_list
+            return jsonify(new_list), HTTP_200_OK 
     else:
         return validate
 
