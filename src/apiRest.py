@@ -8,7 +8,7 @@ import uuid
 import hashlib
 import secrets
 import threading
-from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
+from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, MAX_DOCUMENTS
 
 app = Flask(__name__)
 api = Api(app)
@@ -71,10 +71,8 @@ def verifyHeader(username):
         #Verify that the token exist and it belongs to the user that do the request
         token_exist = verifyToken(authHeader[1])
         user_name = token_exist[1]
-        if(token_exist[0] == False):
+        if(token_exist[0] == False or user_name != username):
             return jsonify({'error': "Incorrect token."}), HTTP_403_FORBIDDEN
-        elif(user_name != username):
-            return jsonify({'error': "The token of the header belongs to other user."}), HTTP_403_FORBIDDEN
         else:
             return True,'The authorization header is correct.'
 
@@ -151,9 +149,10 @@ def get(username, doc_id):
 def post(username,doc_id):
     validate = verifyHeader(username)
     if(validate[0] == True):
-        userFound = [users for users in UserList if users['username'] == username]
-        docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id and doc['owner']==username]
-        if(len(userFound) == 1 and len(docFound) == 0):
+        docSameId = [doc for doc in DocumentList if doc['doc_id'] == doc_id and doc['owner']==username]
+        userDocs = [doc for doc in DocumentList if doc['owner'] == username]
+        print(len(userDocs)==MAX_DOCUMENTS)
+        if len(docSameId) != 0 and len(userDocs) != MAX_DOCUMENTS:
             try:
                 doc = {
                     "owner":username,
@@ -165,16 +164,16 @@ def post(username,doc_id):
 
             DocumentList.append(doc)
             size = sys.getsizeof(request.json['doc_content'])
-        
             data = read('documents.json')
             data.append(doc)
             write('documents.json', data)
         
             return jsonify({"size": size}), HTTP_201_CREATED 
-        elif (len(docFound) > 0):
-            return jsonify({'error': "The user "+username +" has another document with this doc_id! Try again with other doc_id."}), HTTP_400_BAD_REQUEST
-        else:
-            return jsonify({'error': "The username "+username+" does not exist! Try again with other username."}), HTTP_400_BAD_REQUEST
+        elif (len(docSameId) == 1):
+            return jsonify({'error': "You have another document with this doc_id! Try again with other doc_id."}), HTTP_400_BAD_REQUEST
+        elif (len(userDocs) == MAX_DOCUMENTS):
+            print("ualsjdflkasjflaj")
+            return jsonify({'error': "You have the maximum number of documents ("+str(MAX_DOCUMENTS)+"). If you want to create another one, you must delete other document."}), HTTP_400_BAD_REQUEST        
     else:
         return validate
 
@@ -186,7 +185,7 @@ def put(username, doc_id):
     if(validate[0] == True):
         docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
         if(len(docFound) == 0):
-            return jsonify({'error': "The document with id "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
+            return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
         for document in DocumentList:
             if(document['owner']==username and document['doc_id']==doc_id):
                 document['doc_content'] = request.json['doc_content']
@@ -205,7 +204,7 @@ def delete(username, doc_id):
     if(validate[0] == True):
         docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
         if(len(docFound) == 0):
-            return jsonify({'error': "The document with id "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
+            return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
         else:
             for doc in DocumentList:
                 if(doc['owner'] == username and doc['doc_id'] == doc_id):
@@ -236,7 +235,7 @@ def get_all_docs(username):
                 }
                 new_list.append(document)
         if coincidence == False:
-            return jsonify({'error': "The user "+username+"does not have any document."}), HTTP_404_NOT_FOUND
+            return jsonify({'error': "You don't have any document."}), HTTP_404_NOT_FOUND
         else:
             return jsonify(new_list), HTTP_200_OK 
     else:
