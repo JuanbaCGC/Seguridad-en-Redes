@@ -4,6 +4,8 @@ from flask import Flask, jsonify, request, Blueprint
 from flask_restful import Resource, Api
 import sys
 import json
+import uuid
+import hashlib
 import secrets
 import threading
 from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
@@ -76,6 +78,16 @@ def verifyHeader(username):
         else:
             return True,'The authorization header is correct.'
 
+def hashPass(password):
+    #Hashing function for a password using random unique salt
+    salt = uuid.uuid4().hex
+    return hashlib.sha256(salt.encode() + password.encode()).hexdigest() + ':' + salt
+
+def matchHashedText(hashedPass, providedPass):
+    #Check for the password in the hashed password
+    _hashedPass, salt = hashedPass.split(':')
+    return _hashedPass == hashlib.sha256(salt.encode() + providedPass.encode()).hexdigest()
+
 #/VERSION
 @app.route('/version', methods=['GET'])
 def getVersion():
@@ -87,7 +99,7 @@ def signup():
     try:
         newUser = {
             "username": request.json['username'],
-            "password": request.json['password']
+            "password": hashPass(request.json['password'])
         }
     except KeyError:
         return jsonify({'error': "Introduce only the username and the password."}), HTTP_403_FORBIDDEN
@@ -112,7 +124,7 @@ def login():
     try:
         user = {
             "username": request.json['username'],
-            "password": request.json['password']
+            "password": hashPass(request.json['password'])
         }
     except KeyError:
         return jsonify({'error': "Introduce only the username and the password."}), HTTP_403_FORBIDDEN
