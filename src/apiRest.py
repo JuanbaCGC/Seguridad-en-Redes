@@ -8,10 +8,18 @@ import uuid
 import hashlib
 import secrets
 import threading
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, MAX_DOCUMENTS
 
 app = Flask(__name__)
 api = Api(app)
+
+limiter = Limiter(
+        app,
+        key_func=get_remote_address,
+        default_limits=["30 per minute"]
+    )
 
 UserList=[]
 DocumentList=[]
@@ -104,6 +112,7 @@ def getVersion():
 
 #/SIGNUP
 @app.route('/signup', methods=['POST'])
+@limiter.limit("30 per minute", key_func = lambda : request.json['username'])
 def signup():
     try:
         newUser = {
@@ -129,6 +138,7 @@ def signup():
 
 #/LOGIN
 @app.route('/login', methods=['POST'])
+@limiter.limit("30 per minute", key_func = lambda : request.json['username'])
 def login():
     try:
         userFound = [users for users in UserList if users['username'] == request.json['username'] and matchHashedText(users['hash-salt'],request.json['password'])]
