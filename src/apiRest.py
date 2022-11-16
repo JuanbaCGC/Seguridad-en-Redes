@@ -246,21 +246,20 @@ def get_all_docs(username):
     if(validate[0] == True):
         coincidence = False
         counter = 0
-        new_list=[]
+        doc_list={}
+        content_list = {}
         for documents in DocumentList:
             if(documents['owner']  == username):
                 coincidence = True
                 counter += 1
                 doc_id = "id"+str(counter)
-                document = {
-                    doc_id: documents['doc_id'],
-                    "doc_content":documents['doc_content']
-                }
-                new_list.append(document)
+                content_list = {"content":documents['doc_content']}
+                doc_list[doc_id] = content_list
+        print(doc_list)
         if coincidence == False:
             return jsonify({'error': "You don't have any document."}), HTTP_404_NOT_FOUND
         else:
-            return jsonify(new_list), HTTP_200_OK 
+            return doc_list, HTTP_200_OK 
     else:
         return validate
 if __name__ == '__main__':
