@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from flask import Flask, jsonify, request, Blueprint
+import os
 from flask_restful import Resource, Api
 import sys
 import json
@@ -14,7 +15,7 @@ from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUES
 
 app = Flask(__name__)
 api = Api(app)
-
+root = "/home/kali/Server"
 limiter = Limiter(
         app,
         key_func=get_remote_address,
@@ -127,11 +128,11 @@ def signup():
         return jsonify({'error': "There is a user with the same name. Try other user name."}), HTTP_403_FORBIDDEN
     else:
         UserList.append(newUser)
-
         data = read('users.json')
         data.append(newUser)
         write('users.json', data)
-
+        
+        os.mkdir(root+"/"+request.json['username'])
         token = secrets.token_urlsafe(20)
         writeToken(token,request.json['username'])
         return jsonify({"access_token": token}), HTTP_201_CREATED 
@@ -246,20 +247,16 @@ def get_all_docs(username):
     if(validate[0] == True):
         coincidence = False
         counter = 0
-        doc_list={}
-        content_list = {}
+        documents_found={}
         for documents in DocumentList:
             if(documents['owner']  == username):
                 coincidence = True
-                counter += 1
-                doc_id = "id"+str(counter)
-                content_list = {"content":documents['doc_content']}
-                doc_list[doc_id] = content_list
-        print(doc_list)
+                documents_found[documents['doc_id']] = documents['doc_content']
+               # documents_found[documents['doc_id']] = [documents['doc_content']]
         if coincidence == False:
             return jsonify({'error': "You don't have any document."}), HTTP_404_NOT_FOUND
         else:
-            return doc_list, HTTP_200_OK 
+            return documents_found, HTTP_200_OK 
     else:
         return validate
 if __name__ == '__main__':
