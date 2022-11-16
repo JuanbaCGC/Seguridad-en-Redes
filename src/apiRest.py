@@ -193,7 +193,9 @@ def post(username,doc_id):
         elif (len(docSameId) == 1):
             return jsonify({'error': "You have another document with this doc_id! Try again with other doc_id."}), HTTP_400_BAD_REQUEST
         elif (len(userDocs) == MAX_DOCUMENTS):
-            return jsonify({'error': "You have the maximum number of documents ("+str(MAX_DOCUMENTS)+"). If you want to create another one, you must delete other document."}), HTTP_400_BAD_REQUEST        
+            return jsonify({'error': "You have the maximum number of documents ("+str(MAX_DOCUMENTS)+"). If you want to create another one, you must delete other document."}), HTTP_400_BAD_REQUEST       
+        elif len(docSameId) == 0:
+            return jsonify({'error': "You don't have any document with this name! Try again with other document name."}), HTTP_400_BAD_REQUEST
     else:
         return validate
 
@@ -206,14 +208,15 @@ def put(username, doc_id):
         docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
         if(len(docFound) == 0):
             return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
-        for document in DocumentList:
-            if(document['owner']==username and document['doc_id']==doc_id):
-                document['doc_content'] = request.json['doc_content']
+        else:
+            for document in DocumentList:
+                if(document['owner']==username and document['doc_id']==doc_id):
+                    document['doc_content'] = request.json['doc_content']
     
-        size = sys.getsizeof(request.json['doc_content'])
-        write('documents.json',DocumentList)
+            size = sys.getsizeof(request.json['doc_content'])
+            write('documents.json',DocumentList)
 
-        return jsonify({"size": size}), HTTP_201_CREATED 
+            return jsonify({"size": size}), HTTP_201_CREATED 
     else:
         return validate
 
@@ -260,7 +263,6 @@ def get_all_docs(username):
             return jsonify(new_list), HTTP_200_OK 
     else:
         return validate
-
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
     app.teardown_appcontext(clearTokens())
