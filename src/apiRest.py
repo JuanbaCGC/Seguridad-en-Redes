@@ -11,6 +11,7 @@ import secrets
 import threading
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from json.decoder import JSONDecodeError
 from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, MAX_DOCUMENTS
 
 app = Flask(__name__)
@@ -131,7 +132,7 @@ def signup():
         data = read('users.json')
         data.append(newUser)
         write('users.json', data)
-        
+
         os.mkdir(root+"/"+request.json['username'])
         token = secrets.token_urlsafe(20)
         writeToken(token,request.json['username'])
@@ -171,32 +172,23 @@ def get(username, doc_id):
 def post(username,doc_id):
     validate = verifyHeader(username)
     if(validate[0] == True):
-        docSameId = [doc for doc in DocumentList if doc['doc_id'] == doc_id and doc['owner']==username]
-        userDocs = [doc for doc in DocumentList if doc['owner'] == username]
-        print(len(userDocs)==MAX_DOCUMENTS)
-        if len(docSameId) != 0 and len(userDocs) != MAX_DOCUMENTS:
+        documents_list = os.listdir(root+"/"+username)
+        if len(documents_list) == MAX_DOCUMENTS:
+            return jsonify({'error': "You have the maximum number of documents ("+str(MAX_DOCUMENTS)+"). If you want to create another one, you must delete other document."}), HTTP_400_BAD_REQUEST    
+        if doc_id in documents_list:
+            return jsonify({'error': "You have another document with this doc_id! Try again with other doc_id."}), HTTP_400_BAD_REQUEST
+        else:
+            parameters = request.get_json(force=True)
             try:
-                doc = {
-                    "owner":username,
-                    "doc_id":doc_id,
-                    "doc_content":request.json['doc_content']
-                }
+                content = json.dumps(parameters['doc_content'])
+            except TypeError:
+                return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
             except KeyError:
                 return jsonify({'error': "Introduce the doc_content."}), HTTP_400_BAD_REQUEST
-
-            DocumentList.append(doc)
-            size = sys.getsizeof(request.json['doc_content'])
-            data = read('documents.json')
-            data.append(doc)
-            write('documents.json', data)
-        
+            file = open(root+"/"+username+"/"+doc_id, "w")
+            file.write(str(content))
+            size = sys.getsizeof(str(content))
             return jsonify({"size": size}), HTTP_201_CREATED 
-        elif (len(docSameId) == 1):
-            return jsonify({'error': "You have another document with this doc_id! Try again with other doc_id."}), HTTP_400_BAD_REQUEST
-        elif (len(userDocs) == MAX_DOCUMENTS):
-            return jsonify({'error': "You have the maximum number of documents ("+str(MAX_DOCUMENTS)+"). If you want to create another one, you must delete other document."}), HTTP_400_BAD_REQUEST       
-        elif len(docSameId) == 0:
-            return jsonify({'error': "You don't have any document with this name! Try again with other document name."}), HTTP_400_BAD_REQUEST
     else:
         return validate
 
