@@ -16,7 +16,7 @@ from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUES
 
 app = Flask(__name__)
 api = Api(app)
-root = "/home/kali/Server"
+root = "/home/kali/.practica3/Seguridad-en-Redes/src"
 limiter = Limiter(
         app,
         key_func=get_remote_address,
@@ -166,7 +166,7 @@ def get(username, doc_id):
             return jsonify({'error': "The user "+username+" does not have any document with this name."}), HTTP_404_NOT_FOUND
         else:
             file = open(root+"/"+username+"/"+doc_id, "r")
-            return jsonify(file), HTTP_200_OK
+            return jsonify(json.load(file)), HTTP_200_OK
     else:
         return validate
 
@@ -238,20 +238,21 @@ def delete(username, doc_id):
 def get_all_docs(username):
     validate = verifyHeader(username)
     if(validate[0] == True):
-        coincidence = False
-        counter = 0
-        documents_found={}
-        for documents in DocumentList:
-            if(documents['owner']  == username):
-                coincidence = True
-                documents_found[documents['doc_id']] = documents['doc_content']
-               # documents_found[documents['doc_id']] = [documents['doc_content']]
-        if coincidence == False:
-            return jsonify({'error': "You don't have any document."}), HTTP_404_NOT_FOUND
+        if os.path.exists(username):
+            if len(os.listdir(root+"/"+username)) == 0:
+                return jsonify({'error': "You don't have any document."}), HTTP_404_NOT_FOUND
+            else:
+                documents_found={}
+                for filename in os.listdir(root+"/"+username):
+                    file = open(root+"/"+username+"/"+filename, "r")
+                    documents_found[filename] = json.load(file)
+                return jsonify(documents_found), HTTP_200_OK 
         else:
-            return documents_found, HTTP_200_OK 
+            return jsonify({'error': "Username does not exist."}), HTTP_404_NOT_FOUND
     else:
         return validate
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
     app.teardown_appcontext(clearTokens())
+    
