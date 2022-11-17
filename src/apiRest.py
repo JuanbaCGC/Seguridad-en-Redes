@@ -9,6 +9,7 @@ import uuid
 import hashlib
 import secrets
 import threading
+from werkzeug.exceptions import BadRequest
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from json.decoder import JSONDecodeError
@@ -183,7 +184,7 @@ def post(username,doc_id):
         else:
             try:
                 parameters = request.get_json(force=True)
-            except:
+            except BadRequest:
                 return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
             try:
                 content = json.dumps(parameters['doc_content'])
@@ -209,7 +210,7 @@ def put(username, doc_id):
         else:
             try:
                 parameters = request.get_json(force=True)
-            except:
+            except BadRequest:
                 return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
             try:
                 content = json.dumps(parameters['doc_content'])
@@ -244,7 +245,7 @@ def delete(username, doc_id):
 def get_all_docs(username):
     validate = verifyHeader(username)
     if(validate[0] == True):
-        if os.path.exists(username):
+        if os.path.exists(root+"/"+username):
             if len(os.listdir(root+"/"+username)) == 0:
                 return jsonify({'error': "You don't have any document."}), HTTP_404_NOT_FOUND
             else:
