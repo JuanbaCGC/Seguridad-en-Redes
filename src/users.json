@@ -10,5 +10,9 @@
     {
         "username": "Arturo",
         "hash-salt": "ba09fd4c27a8767e6c1cf9c4f32de931d388f6d5d4d7827ce9b0f7337d787efe:58def1e6be8640dc858c0a547963dba4"
+    },
+    {
+        "username": "Arz",
+        "hash-salt": "d85b70354f0c8f0570a85973ba8742d97dd1fc2726136bd28720081f8fb7d2dd:2124e1c89dab455b985d9406b985c526"
     }
 ]

@@ -16,7 +16,7 @@ from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUES
 
 app = Flask(__name__)
 api = Api(app)
-root = "/home/kali/Server"
+root = "/home/arturo/Universidad"
 limiter = Limiter(
         app,
         key_func=get_remote_address,
@@ -195,20 +195,22 @@ def post(username,doc_id):
 #PUT DOCUMENT
 @app.route('/<string:username>/<string:doc_id>', methods=['PUT'])
 def put(username, doc_id):
-    global DocumentList
     validate = verifyHeader(username)
     if(validate[0] == True):
-        docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
-        if(len(docFound) == 0):
+        documents_list = os.listdir(root+"/"+username)
+        if doc_id not in documents_list:
             return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
         else:
-            for document in DocumentList:
-                if(document['owner']==username and document['doc_id']==doc_id):
-                    document['doc_content'] = request.json['doc_content']
-    
-            size = sys.getsizeof(request.json['doc_content'])
-            write('documents.json',DocumentList)
-
+            parameters = request.get_json(force=True)
+            try:
+                content = json.dumps(parameters['doc_content'])
+            except TypeError:
+                return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
+            except KeyError:
+                return jsonify({'error': "Introduce the doc_content."}), HTTP_400_BAD_REQUEST
+            file = open(root+"/"+username+"/"+doc_id, "w")
+            file.write(str(content))
+            size = sys.getsizeof(str(content))
             return jsonify({"size": size}), HTTP_201_CREATED 
     else:
         return validate
