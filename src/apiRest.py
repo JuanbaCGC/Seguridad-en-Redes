@@ -16,7 +16,7 @@ from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUES
 
 app = Flask(__name__)
 api = Api(app)
-root = "/home/arturo/Universidad"
+root = "/home/kali/Server"
 limiter = Limiter(
         app,
         key_func=get_remote_address,
@@ -114,12 +114,13 @@ def getVersion():
 
 #/SIGNUP
 @app.route('/signup', methods=['POST'])
-@limiter.limit("30 per minute", key_func = lambda : request.json['username'])
+@limiter.limit("30 per minute", key_func = lambda : request.get_json(force=True)['username'])
 def signup():
     try:
+        parameters = request.get_json(force=True)
         newUser = {
-            "username": request.json['username'],
-            "hash-salt": hashPass(request.json['password'])
+            "username": str(parameters['username']),
+            "hash-salt": hashPass(str(parameters['password']))
         }
     except KeyError:
         return jsonify({'error': "Introduce only the username and the password."}), HTTP_400_BAD_REQUEST
@@ -136,19 +137,20 @@ def signup():
         os.mkdir(root+"/"+request.json['username'])
         token = secrets.token_urlsafe(20)
         writeToken(token,request.json['username'])
-        return jsonify({"access_token": token}), HTTP_201_CREATED 
+        return jsonify({"access_token": token}), HTTP_201_CREATED
 
 #/LOGIN
 @app.route('/login', methods=['POST'])
-@limiter.limit("30 per minute", key_func = lambda : request.json['username'])
+@limiter.limit("30 per minute", key_func = lambda : request.get_json(force=True)['username'])
 def login():
     try:
-        userFound = [users for users in UserList if users['username'] == request.json['username'] and matchHashedText(users['hash-salt'],request.json['password'])]
+        parameters = request.get_json(force=True)
+        userFound = [users for users in UserList if users['username'] == str(parameters['username']) and matchHashedText(users['hash-salt'],str(parameters['password']))]
     except KeyError:
         return jsonify({'error': "Introduce only the username and the password."}), HTTP_400_BAD_REQUEST
     if(len(userFound) > 0):
         token = secrets.token_urlsafe(20)
-        writeToken(token,request.json['username'])
+        writeToken(token,str(parameters['username']))
         return jsonify({"access_token": token}), HTTP_201_CREATED 
     else:
         return jsonify({'error': "Incorrect username or password!"}), HTTP_403_FORBIDDEN
@@ -158,12 +160,13 @@ def login():
 @app.route('/<string:username>/<string:doc_id>', methods=['GET'])
 def get(username, doc_id):
     validate = verifyHeader(username)
-    if(validate[0] == True): 
-        docFound = [doc for doc in DocumentList if doc['owner'] == username and doc['doc_id'] == doc_id]
-        if(len(docFound) != 1):
+    if(validate[0] == True):
+        documents_list = os.listdir(root+"/"+username)
+        if doc_id not in documents_list:
             return jsonify({'error': "The user "+username+" does not have any document with this name."}), HTTP_404_NOT_FOUND
         else:
-            return jsonify(docFound), HTTP_200_OK
+            file = open(root+"/"+username+"/"+doc_id, "r")
+            return jsonify(file), HTTP_200_OK
     else:
         return validate
 
@@ -220,15 +223,11 @@ def put(username, doc_id):
 def delete(username, doc_id):
     validate = verifyHeader(username)
     if(validate[0] == True):
-        docFound = [doc for doc in DocumentList if doc['doc_id'] == doc_id]
-        if(len(docFound) == 0):
+        documents_list = os.listdir(root+"/"+username)
+        if doc_id not in documents_list:
             return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
         else:
-            for doc in DocumentList:
-                if(doc['owner'] == username and doc['doc_id'] == doc_id):
-                    DocumentList.remove(doc)
-            write('documents.json', DocumentList)
-    
+            os.remove(root+"/"+username+"/"+doc_id)
         return jsonify({}), HTTP_200_OK 
     else:
         return validate
