@@ -181,7 +181,10 @@ def post(username,doc_id):
         if doc_id in documents_list:
             return jsonify({'error': "You have another document with this doc_id! Try again with other doc_id."}), HTTP_400_BAD_REQUEST
         else:
-            parameters = request.get_json(force=True)
+            try:
+                parameters = request.get_json(force=True)
+            except:
+                return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
             try:
                 content = json.dumps(parameters['doc_content'])
             except TypeError:
