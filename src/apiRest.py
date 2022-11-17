@@ -207,7 +207,10 @@ def put(username, doc_id):
         if doc_id not in documents_list:
             return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
         else:
-            parameters = request.get_json(force=True)
+            try:
+                parameters = request.get_json(force=True)
+            except:
+                return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
             try:
                 content = json.dumps(parameters['doc_content'])
             except TypeError:
