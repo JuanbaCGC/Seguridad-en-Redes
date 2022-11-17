@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from flask import Flask, jsonify, request, Blueprint
+from flask import Flask, jsonify, request
 import os
 from flask_restful import Resource, Api
 import sys
@@ -11,13 +11,13 @@ import secrets
 import threading
 from werkzeug.exceptions import BadRequest
 from flask_limiter import Limiter
+from pathlib import Path
 from flask_limiter.util import get_remote_address
-from json.decoder import JSONDecodeError
 from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, MAX_DOCUMENTS
 
 app = Flask(__name__)
 api = Api(app)
-root = "/home/kali/.practica3/Seguridad-en-Redes/src"
+root = str(Path.home())+"/Server"
 limiter = Limiter(
         app,
         key_func=get_remote_address,
@@ -25,17 +25,14 @@ limiter = Limiter(
     )
 
 UserList=[]
-DocumentList=[]
+
+if os.path.isdir(root) is False:
+    os.mkdir(root)
 
 #Read users.json
 users_json = json.load(open('users.json'))
 for user in users_json:
     UserList.append(user)
-
-#Read documents.json
-documents_json = json.load(open('documents.json'))
-for document in documents_json:
-    DocumentList.append(document)
 
 # Method that read the input filename
 def read(filename):
@@ -108,6 +105,16 @@ def matchHashedText(hashedPass, providedPass):
 def clearTokens():
     write('tokens.json', [])
 
+# Method to get the identification of the user in order to count her requests
+def getUsername():
+    try:
+        name = str(request.get_json(force=True))
+    except KeyError:
+        return str(secrets.token_urlsafe(20))
+    except BadRequest:
+        return str(secrets.token_urlsafe(20))
+    return name
+
 #/VERSION
 @app.route('/version', methods=['GET'])
 def getVersion():
@@ -115,16 +122,19 @@ def getVersion():
 
 #/SIGNUP
 @app.route('/signup', methods=['POST'])
-@limiter.limit("30 per minute", key_func = lambda : request.get_json(force=True)['username'])
+@limiter.limit("30 per minute", key_func = lambda : getUsername())
 def signup():
     try:
         parameters = request.get_json(force=True)
+        name = parameters['username']
         newUser = {
-            "username": str(parameters['username']),
+            "username": str(name),
             "hash-salt": hashPass(str(parameters['password']))
         }
     except KeyError:
-        return jsonify({'error': "Introduce only the username and the password."}), HTTP_400_BAD_REQUEST
+        return jsonify({'error': "Introduce the username and the password."}), HTTP_400_BAD_REQUEST
+    except BadRequest:
+        return jsonify({'error': "Introduce the username and the password."}), HTTP_400_BAD_REQUEST
         
     userFound = [users for users in UserList if users['username'] == request.json['username']]
     if (len(userFound) > 0):
@@ -142,13 +152,15 @@ def signup():
 
 #/LOGIN
 @app.route('/login', methods=['POST'])
-@limiter.limit("30 per minute", key_func = lambda : request.get_json(force=True)['username'])
+@limiter.limit("30 per minute", key_func = lambda : getUsername())
 def login():
     try:
         parameters = request.get_json(force=True)
         userFound = [users for users in UserList if users['username'] == str(parameters['username']) and matchHashedText(users['hash-salt'],str(parameters['password']))]
     except KeyError:
-        return jsonify({'error': "Introduce only the username and the password."}), HTTP_400_BAD_REQUEST
+        return jsonify({'error': "Introduce the username and the password."}), HTTP_400_BAD_REQUEST
+    except BadRequest:
+        return jsonify({'error': "Introduce the username and the password."}), HTTP_400_BAD_REQUEST
     if(len(userFound) > 0):
         token = secrets.token_urlsafe(20)
         writeToken(token,str(parameters['username']))
