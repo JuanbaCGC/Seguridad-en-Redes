@@ -1,14 +1,14 @@
 [
     {
-        "username": "JuanbaCGC",
-        "hash-salt": "29ee69dd886631afaa4a117be4c1e7f1dc7a8b5f044151f2834b18722f948878:5d6742e38dcc4d6899f2ed0e7e9c334f"
+        "username": "Juanba",
+        "hash-salt": "69dc82fb4fbfb78e91bd9f1dc524c6597ba7077a9d2dd168ed4b5f4f13838c26:9d4b7ddea54d463c82898d58c504a6c7"
     },
     {
-        "username": "AlbertoMN",
-        "hash-salt": "22d27888836d07ec71999979e4ff2b0ce3c63fb789ab877b300b4581f73ec7b3:a15aec305b64481ca459c7ea2eb83570"
+        "username": "Alberto",
+        "hash-salt": "1d3dea3d83c18aae30f47f077e348c8b28c49a762e6c882f0b780558676612b8:7afef8aaa8fc4b11b1ba210a68527b37"
     },
     {
-        "username": "ArtugoGJ",
-        "hash-salt": "620ecd5fede81a6ba63843a90d9321c0507306892f8d9ad5bfe1e9f238e432b8:0df48164b2ad433f9ff2eee8dbda2f9a"
+        "username": "Arturo",
+        "hash-salt": "ba09fd4c27a8767e6c1cf9c4f32de931d388f6d5d4d7827ce9b0f7337d787efe:58def1e6be8640dc858c0a547963dba4"
     }
 ]
