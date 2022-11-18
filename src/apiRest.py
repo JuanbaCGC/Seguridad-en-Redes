@@ -108,7 +108,7 @@ def clearTokens():
 # Method to get the identification of the user in order to count her requests
 def getUsername():
     try:
-        name = str(request.get_json(force=True))
+        name = str(request.get_json(force=True)['username'])
     except KeyError:
         return str(secrets.token_urlsafe(20))
     except BadRequest:
@@ -144,8 +144,8 @@ def signup():
         data = read('users.json')
         data.append(newUser)
         write('users.json', data)
-
-        os.mkdir(root+"/"+request.json['username'])
+        if os.path.isdir(root+"/"+request.json['username']) is False:
+            os.mkdir(root+"/"+request.json['username'])
         token = secrets.token_urlsafe(20)
         writeToken(token,request.json['username'])
         return jsonify({"access_token": token}), HTTP_201_CREATED
