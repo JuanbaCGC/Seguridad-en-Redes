@@ -272,6 +272,6 @@ def get_all_docs(username):
         return validate
 
 if __name__ == '__main__':
-    app.run(debug=True, ssl_contex=("cert.pem", "key.pem"), port=5000)
+    app.run(debug=True, ssl_context=("cert.pem", "key.pem"), port=5000)
     app.teardown_appcontext(clearTokens())
     
