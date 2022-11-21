@@ -9,11 +9,14 @@ import uuid
 import hashlib
 import secrets
 import threading
+import string
 from werkzeug.exceptions import BadRequest
 from flask_limiter import Limiter
 from pathlib import Path
 from flask_limiter.util import get_remote_address
-from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND, MAX_DOCUMENTS
+from http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
+
+MAX_DOCUMENTS = 5
 
 app = Flask(__name__)
 api = Api(app)
@@ -115,6 +118,29 @@ def getUsername():
         return str(secrets.token_urlsafe(20))
     return name
 
+# Method validate the password
+def validPass(password):
+    number = False
+    upChar = False
+    lowChar = False
+    special_char = False
+    size = len(password) >= 8
+
+    special_characters = """!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"""
+
+    for c in password:
+        if c.isdigit():
+            number = True
+        if c.isupper():
+            upChar = True
+        if c.islower():
+            lowChar = True
+        for sc in special_characters:
+            if c == sc:
+                special_char = True
+
+    return size and number and upChar and lowChar and special_char
+
 #/VERSION
 @app.route('/version', methods=['GET'])
 def getVersion():
@@ -127,10 +153,13 @@ def signup():
     try:
         parameters = request.get_json(force=True)
         name = parameters['username']
-        newUser = {
-            "username": str(name),
-            "hash-salt": hashPass(str(parameters['password']))
-        }
+        if(validPass(parameters['password']) == False):
+            return jsonify({'error': "Invalid password!."}), HTTP_400_BAD_REQUEST
+        else:
+            newUser = {
+                "username": str(name),
+                "hash-salt": hashPass(str(parameters['password']))
+            }
     except KeyError:
         return jsonify({'error': "Introduce the username and the password."}), HTTP_400_BAD_REQUEST
     except BadRequest:

@@ -1,1 +1,74 @@
-[]
+[
+    {
+        "username": "Juanba",
+        "hash-salt": "f026b0a05d583e4677309fc21d18c8d214a37961463b9e16ce8fba498693684d:65c9efafc7194574a158e8d42333c20a"
+    },
+    {
+        "username": "Arturo",
+        "hash-salt": "73c504c690a67565355018ec07cd4f51ec716e629f2a7f5847408960e7fc46cc:c446ba18e9384cf4bfa915dd30027cff"
+    },
+    {
+        "username": "Alberto",
+        "hash-salt": "8ff87f2a0c9b047b1fda8b646bdce1c93ccaa8cebb0a20dc06e14db5d7ccc2bd:b9d974d3c20d44c39f020a4ea240d4cf"
+    },
+    {
+        "username": "Juanba2",
+        "hash-salt": "6acb746d5a524a7fa830d1c62d3ba37676a85ff1a35e5f7808fa7f6c9e0ce845:527e7b713f0f41e4ba30dd30c0ccbc69"
+    },
+    {
+        "username": "Juanba3",
+        "hash-salt": "32091bc3b0a5979d34381cc985680937927622a69ce55a04e48fcf688be4de13:c169d99a6d454cc5850ad67c36300d4d"
+    },
+    {
+        "username": "Juanba4",
+        "hash-salt": "5dfc393b43f2975275afa1903174327e4e6474affbc3a8c4765443eb55e697f5:c525047283e14758b1f3d01863941735"
+    },
+    {
+        "username": "Juanba5",
+        "hash-salt": "f7f015d9a88007b825716169e40e48f90936995bbbe9d6a2705479e0c4f0e836:864b99440089409c819c767379ff67c8"
+    },
+    {
+        "username": "Juanba6",
+        "hash-salt": "06f2a918b9225ee80207e3f0a607dad16a079ad28481b6f2255ccaaac8145315:9c7d697f290f45f99de0d1c792e11070"
+    },
+    {
+        "username": "Juanba7",
+        "hash-salt": "55642626537b85a4503cbd4da96aeefdbc31976deb43b2cda945fde5f0c43f02:22f2007772f34e93b7c0e68ab1fa4a6b"
+    },
+    {
+        "username": "Juanba8",
+        "hash-salt": "192c56200e0a65559e4f8f6db3904f42c868dacf4c381d65ffb6c7ee7a46cad3:204360876cda44159d422c45c4a03bd1"
+    },
+    {
+        "username": "Juanba9",
+        "hash-salt": "745abeafe796ff8bdb008b6b3b847d41be2a30aeb22b275a35500414eecdd5b9:5a16c12d3dea4d5fb194ca2bac00c80a"
+    },
+    {
+        "username": "Juanba10",
+        "hash-salt": "bfaa751cce42af8a4fceb3a98a570234238194cffbde45b0e69ce5da757b0a2f:4582c2c19b0549799b00b18a90d91cfa"
+    },
+    {
+        "username": "Juanba1aa0",
+        "hash-salt": "a63900ac1cf882148b1de7fc0740558baea71bdeafe556d51330ea49abe25fdc:d9e38cd5a62f4de5ab8138f63d36b3c2"
+    },
+    {
+        "username": "Juanbaa1aa0",
+        "hash-salt": "b4070606fd084626a3ec0710012cbf1af97fee11d85d67d914c0185c27868c31:a2bba3fb7186456b866f56d789ff8c78"
+    },
+    {
+        "username": "Juanbaa1aaa1",
+        "hash-salt": "cfe939ae1689395a0f68fc752dfb464bf668c85451edb798a68634c955b5aed0:7e7d927d2e234039a7a8724d4c5e0b5d"
+    },
+    {
+        "username": "Juajkgka1",
+        "hash-salt": "15c88079e4d25885fc9b525135675c62ebf8e94b66b4f921b282305735bdb167:80f6e37b8b1b4f28bc500fa2b614a3c0"
+    },
+    {
+        "username": "Juajkgka56",
+        "hash-salt": "88662be250687568d0649dd1f1456b6b443b1474e62dc93f4100927ceddf94b3:d4a61de3ac344b9d91c2330e1a9ce364"
+    },
+    {
+        "username": "Juajkgka57",
+        "hash-salt": "cd6ef63091269e42630a96bc3553ade43cd57000ad3d5523cf5f42f0c2ffb4d7:3ec9e4c86f8441ccaa2723ee224691e8"
+    }
+]
