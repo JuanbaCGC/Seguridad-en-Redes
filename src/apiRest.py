@@ -154,7 +154,7 @@ def signup():
         parameters = request.get_json(force=True)
         name = parameters['username']
         if(validPass(parameters['password']) == False):
-            return jsonify({'error': "Invalid password!."}), HTTP_400_BAD_REQUEST
+            return jsonify({'error': "Invalid password! The password must have at least one capital letter, one miscule letter, one digit, and one special character."}), HTTP_400_BAD_REQUEST
         else:
             newUser = {
                 "username": str(name),
