@@ -7,12 +7,12 @@ echo -e "\n"
 
 # Create differents users
 echo "Creating differents users with differents names..."
-token1=$(curl --silent -X POST -d '{"username":"Juanba","password":"12345"}' https://127.0.0.1:5000/signup | jq -r '.access_token')
-token2=$(curl --silent -X POST -d '{"username":"Arturo","password":"12345"}' https://127.0.0.1:5000/signup | jq -r '.access_token')
-token3=$(curl --silent -X POST -d '{"username":"Alberto","password":"12345"}' https://127.0.0.1:5000/signup | jq -r '.access_token')
+token1=$(curl --silent -X POST -d '{"username":"Juanba","password":"Juanba++1"}' https://127.0.0.1:5000/signup | jq -r '.access_token')
+token2=$(curl --silent -X POST -d '{"username":"Arturo","password":"Arturo+1"}' https://127.0.0.1:5000/signup | jq -r '.access_token')
+token3=$(curl --silent -X POST -d '{"username":"Alberto","password":"Alberto+1"}' https://127.0.0.1:5000/signup | jq -r '.access_token')
 
 echo "Creating a repeated user..."
-curl --silent -X POST -d '{"username":"Juanba","password":"12345"}' https://127.0.0.1:5000/signup
+curl --silent -X POST -d '{"username":"Juanba","password":"Juanba++1"}' https://127.0.0.1:5000/signup
 echo -e "\n"
 
 echo "Triying a login with a wrong password..."
@@ -20,7 +20,7 @@ curl --silent -X POST -d '{"username":"Juanba","password":""}' https://127.0.0.1
 echo -e "\n"
 
 echo "Doing a login with correct username and password..."
-curl --silent -X POST -d '{"username":"Arturo","password":"12345"}' https://127.0.0.1:5000/login
+curl --silent -X POST -d '{"username":"Arturo","password":"Arturo+1"}' https://127.0.0.1:5000/login
 echo -e "\n"
 
 #Post a document for each user
@@ -52,7 +52,7 @@ echo "Posting a document for Alberto without a Json struct..."
 curl -X POST -H "Authorization:token $token3" -d '{"doc_content":{
     "id": 44,
     "game": "Colonos de Catan"
-}' https://127.0.0.1:5000/Alberto/AlbertoDocument
+}' https://127.0.0.1:5000/Alberto/AlbertoDocument2
 echo -e "\n"
 
 echo "Posting a document for Alberto without a Json struct..."
@@ -107,11 +107,52 @@ curl -X PUT -H "Authorization:token $token3" -d '{"doc_content":{
         "suspensos":      0,   
         "matricula":    true  
     }  
-}  }' https://127.0.0.1:5000/Alberto/newDoc
+}  }' https://127.0.0.1:5000/Alberto/doc1
 echo -e "\n"
 
 echo "Geting the updated document of Alberto..."
-curl --silent -X GET -H "Authorization:token $token3" https://127.0.0.1:5000/Alberto/newDoc
+curl --silent -X GET -H "Authorization:token $token3" https://127.0.0.1:5000/Alberto/doc1
+
+echo "Trying to post more than 5 documents..."
+curl -X POST -H "Authorization:token $token3" -d '{"doc_content":{  
+    "employee": {  
+        "name":       "sonoo",   
+        "salary":      56000,   
+        "married":    true  
+    }  
+}}' https://127.0.0.1:5000/Alberto/Doc1
+echo -e "\n"
+
+curl -X POST -H "Authorization:token $token3" -d '{"doc_content":{  
+    "employee": {  
+        "name":       "sonoo",   
+        "salary":      56000,   
+        "married":    true  
+    }  
+}  }' https://127.0.0.1:5000/Alberto/Doc2
+echo -e "\n"
+
+curl -X POST -H "Authorization:token $token3" -d '{"doc_content":{  
+    "employee": {  
+        "name":       "sonoo",   
+        "salary":      56000,   
+        "married":    true  
+    }  
+}  }' https://127.0.0.1:5000/Alberto/Doc3
+echo -e "\n"
+
+curl -X POST -H "Authorization:token $token3" -d '{"doc_content":{  
+    "employee": {  
+        "name":       "sonoo",   
+        "salary":      56000,   
+        "married":    true  
+    }  
+}  }' https://127.0.0.1:5000/Alberto/Doc4
+echo -e "\n"
+
+echo "Getting all the documents of Alberto again..."
+curl --silent -X GET -H "Authorization:token $token3" https://127.0.0.1:5000/Alberto/_all_docs
+echo -e "\n"
 
 echo "Creating request for Juanba till the API stops..."
 watch -n 0.3 ./login.sh

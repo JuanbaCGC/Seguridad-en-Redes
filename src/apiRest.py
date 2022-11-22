@@ -204,10 +204,10 @@ def get(username, doc_id):
     validate = verifyHeader(username)
     if(validate[0] == True):
         documents_list = os.listdir(root+"/"+username)
-        if doc_id not in documents_list:
+        if doc_id+".json" not in documents_list:
             return jsonify({'error': "The user "+username+" does not have any document with this name."}), HTTP_404_NOT_FOUND
         else:
-            file = open(root+"/"+username+"/"+doc_id, "r")
+            file = open(root+"/"+username+"/"+doc_id+".json", "r")
             return jsonify(json.load(file)), HTTP_200_OK
     else:
         return validate
@@ -233,7 +233,7 @@ def post(username,doc_id):
                 return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
             except KeyError:
                 return jsonify({'error': "Introduce the doc_content."}), HTTP_400_BAD_REQUEST
-            file = open(root+"/"+username+"/"+doc_id, "w")
+            file = open(root+"/"+username+"/"+doc_id+".json", "w")
             file.write(str(content))
             size = sys.getsizeof(str(content))
             return jsonify({"size": size}), HTTP_201_CREATED 
@@ -246,7 +246,7 @@ def put(username, doc_id):
     validate = verifyHeader(username)
     if(validate[0] == True):
         documents_list = os.listdir(root+"/"+username)
-        if doc_id not in documents_list:
+        if doc_id+".json" not in documents_list:
             return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
         else:
             try:
@@ -259,7 +259,7 @@ def put(username, doc_id):
                 return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
             except KeyError:
                 return jsonify({'error': "Introduce the doc_content."}), HTTP_400_BAD_REQUEST
-            file = open(root+"/"+username+"/"+doc_id, "w")
+            file = open(root+"/"+username+"/"+doc_id+".json", "w")
             file.write(str(content))
             size = sys.getsizeof(str(content))
             return jsonify({"size": size}), HTTP_201_CREATED 
@@ -272,10 +272,10 @@ def delete(username, doc_id):
     validate = verifyHeader(username)
     if(validate[0] == True):
         documents_list = os.listdir(root+"/"+username)
-        if doc_id not in documents_list:
+        if doc_id+".json" not in documents_list:
             return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
         else:
-            os.remove(root+"/"+username+"/"+doc_id)
+            os.remove(root+"/"+username+"/"+doc_id+".json")
         return jsonify({}), HTTP_200_OK 
     else:
         return validate
