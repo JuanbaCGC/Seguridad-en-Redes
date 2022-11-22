@@ -1,14 +1,1 @@
-[
-    {
-        "username": "Juanba",
-        "hash-salt": "9d4dccb32aeded1ccb5b30ff855e0c94ad1bd5e61ba7f1765fc0008c4f7a570d:3cd394d9e1aa4ec9b11fe327ba4428bf"
-    },
-    {
-        "username": "Arturo",
-        "hash-salt": "f4f39a84f5f5c444930b8baa306dbb86643fb3ce906da43a7b5886d55b49bc90:3a30b1081e1e4ffda0109cfc5afd21a6"
-    },
-    {
-        "username": "Alberto",
-        "hash-salt": "ee9118b22caeee3e130f64ef5d71bbb5a52aa8f1d9afb82ff47c5898ec34b8b7:573a5200adc74595a936a0fef1077ad5"
-    }
-]
+[]
