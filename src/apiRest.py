@@ -2,14 +2,13 @@
 
 from flask import Flask, jsonify, request
 import os
-from flask_restful import Resource, Api
+from flask_restful import Api
 import sys
 import json
 import uuid
 import hashlib
 import secrets
 import threading
-import string
 from werkzeug.exceptions import BadRequest
 from flask_limiter import Limiter
 from pathlib import Path
@@ -79,7 +78,7 @@ def verifyHeader(username):
     #Get the Authorization header (the first position is "token", the second is the user_token) and verify the structure
     header = request.headers.get('Authorization')
     if(header is None):
-        return jsonify({'error': "Header is empty. Enter authorization"}), HTTP_401_UNAUTHORIZED
+        return jsonify({'error': "Header is empty. Enter Authorization header"}), HTTP_401_UNAUTHORIZED
     else:
         authHeader = header.split()
         if(len(authHeader) != 2 or authHeader[0] != "token"):
@@ -118,7 +117,7 @@ def getUsername():
         return str(secrets.token_urlsafe(20))
     return name
 
-# Method validate the password
+# Method that validate the password
 def validPass(password):
     number = False
     upChar = False
@@ -154,7 +153,7 @@ def signup():
         parameters = request.get_json(force=True)
         name = parameters['username']
         if(validPass(parameters['password']) == False):
-            return jsonify({'error': "Invalid password! The password must have at least one capital letter, one miscule letter, one digit, and one special character."}), HTTP_400_BAD_REQUEST
+            return jsonify({'error': "Invalid password! The password must have at least one capital letter, one miscule letter, one digit and one special character."}), HTTP_400_BAD_REQUEST
         else:
             newUser = {
                 "username": str(name),
@@ -167,7 +166,7 @@ def signup():
         
     userFound = [users for users in UserList if users['username'] == request.json['username']]
     if (len(userFound) > 0):
-        return jsonify({'error': "There is a user with the same name. Try other user name."}), HTTP_403_FORBIDDEN
+        return jsonify({'error': "There is a user with the same name. Try to signup with other user name."}), HTTP_403_FORBIDDEN
     else:
         UserList.append(newUser)
         data = read('users.json')
@@ -195,7 +194,7 @@ def login():
         writeToken(token,str(parameters['username']))
         return jsonify({"access_token": token}), HTTP_201_CREATED 
     else:
-        return jsonify({'error': "Incorrect username or password!"}), HTTP_403_FORBIDDEN
+        return jsonify({'error': "Incorrect username or password."}), HTTP_403_FORBIDDEN
 
 #GET DOCUMENT
 #/<string:username>/<string:doc_id>
@@ -205,7 +204,7 @@ def get(username, doc_id):
     if(validate[0] == True):
         documents_list = os.listdir(root+"/"+username)
         if doc_id+".json" not in documents_list:
-            return jsonify({'error': "The user "+username+" does not have any document with this name."}), HTTP_404_NOT_FOUND
+            return jsonify({'error': "You don't have any document with this name."}), HTTP_404_NOT_FOUND
         else:
             file = open(root+"/"+username+"/"+doc_id+".json", "r")
             return jsonify(json.load(file)), HTTP_200_OK
@@ -221,18 +220,18 @@ def post(username,doc_id):
         if len(documents_list) == MAX_DOCUMENTS:
             return jsonify({'error': "You have the maximum number of documents ("+str(MAX_DOCUMENTS)+"). If you want to create another one, you must delete other document."}), HTTP_400_BAD_REQUEST    
         if doc_id in documents_list:
-            return jsonify({'error': "You have another document with this doc_id! Try again with other doc_id."}), HTTP_400_BAD_REQUEST
+            return jsonify({'error': "You have another document with this name! Try again with other name."}), HTTP_400_BAD_REQUEST
         else:
             try:
                 parameters = request.get_json(force=True)
             except BadRequest:
-                return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
+                return jsonify({'error': "Introduce the doc content with a json struct."}), HTTP_400_BAD_REQUEST
             try:
                 content = json.dumps(parameters['doc_content'])
             except TypeError:
-                return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
+                return jsonify({'error': "Introduce the doc content with a json struct."}), HTTP_400_BAD_REQUEST
             except KeyError:
-                return jsonify({'error': "Introduce the doc_content."}), HTTP_400_BAD_REQUEST
+                return jsonify({'error': "Introduce the doc content."}), HTTP_400_BAD_REQUEST
             file = open(root+"/"+username+"/"+doc_id+".json", "w")
             file.write(str(content))
             size = sys.getsizeof(str(content))
@@ -247,18 +246,18 @@ def put(username, doc_id):
     if(validate[0] == True):
         documents_list = os.listdir(root+"/"+username)
         if doc_id+".json" not in documents_list:
-            return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
+            return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other document."}), HTTP_404_NOT_FOUND
         else:
             try:
                 parameters = request.get_json(force=True)
             except BadRequest:
-                return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
+                return jsonify({'error': "Introduce the doc content with a json struct."}), HTTP_400_BAD_REQUEST
             try:
                 content = json.dumps(parameters['doc_content'])
             except TypeError:
-                return jsonify({'error': "Introduce the doc_content with a json struct."}), HTTP_400_BAD_REQUEST
+                return jsonify({'error': "Introduce the doc content with a json struct."}), HTTP_400_BAD_REQUEST
             except KeyError:
-                return jsonify({'error': "Introduce the doc_content."}), HTTP_400_BAD_REQUEST
+                return jsonify({'error': "Introduce the doc content."}), HTTP_400_BAD_REQUEST
             file = open(root+"/"+username+"/"+doc_id+".json", "w")
             file.write(str(content))
             size = sys.getsizeof(str(content))
@@ -273,7 +272,7 @@ def delete(username, doc_id):
     if(validate[0] == True):
         documents_list = os.listdir(root+"/"+username)
         if doc_id+".json" not in documents_list:
-            return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other doc_id."}), HTTP_404_NOT_FOUND
+            return jsonify({'error': "The document "+doc_id+" does not exist! Try again with other document."}), HTTP_404_NOT_FOUND
         else:
             os.remove(root+"/"+username+"/"+doc_id+".json")
         return jsonify({}), HTTP_200_OK 
@@ -296,11 +295,10 @@ def get_all_docs(username):
                     documents_found[filename] = json.load(file)
                 return jsonify(documents_found), HTTP_200_OK 
         else:
-            return jsonify({'error': "Username does not exist."}), HTTP_404_NOT_FOUND
+            return jsonify({'error': "This username does not exist."}), HTTP_404_NOT_FOUND
     else:
         return validate
 
 if __name__ == '__main__':
     app.run(debug=True, ssl_context=("cert.pem", "key.pem"), port=5000)
     app.teardown_appcontext(clearTokens())
-    

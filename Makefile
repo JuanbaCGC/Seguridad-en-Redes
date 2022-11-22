@@ -12,4 +12,4 @@ api:
 tests:
 	./test/test.sh
 
-launchServer: resetServer certificates api
+launchServer: install certificates api
