@@ -155,4 +155,9 @@ curl --silent -X GET -H "Authorization:token $token3" https://127.0.0.1:5000/Alb
 echo -e "\n"
 
 echo "Creating request for Juanba till the API stops..."
-watch -n 0.3 ./login.sh
+filecontent=( `cat "test/pass_brute_force.txt" `)
+
+for t in "${filecontent[@]}"
+do
+curl --silent -X POST -d '{"username":"Juanba","password":"'${t}'"}' https://127.0.0.1:5000/login
+done

@@ -1,5 +1,3 @@
-launchServer: install certificates api
-
 install: 
 	pip install flask flask-limiter
 
@@ -9,7 +7,9 @@ certificates:
 	sudo update-ca-certificates
 
 api:
-	./apiRest.py
+	./src/apiRest.py
 
 tests:
-	./test.sh
+	./test/test.sh
+
+launchServer: resetServer certificates api
